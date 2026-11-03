@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Petty Cash Fund</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#F2F5F9;--panel:#fff;--ink:#0F2033;--mute:#5E6E80;--line:#DDE4EC;--acc:#17508A;--accbg:#E7F0FA;--accfg:#fff;--bad:#B42318;--badbg:#FDECEA;--ok:#117A4D;--okbg:#E6F5EE;--warn:#9A6200;--warnbg:#FFF4DB;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0C1520;--panel:#142231;--ink:#E6EDF5;--mute:#8FA1B4;--line:#26394C;--acc:#6FB1F0;--accbg:#1A3350;--accfg:#08213B;--bad:#F2857A;--badbg:#3A1E1E;--ok:#5FD3A0;--okbg:#14352A;--warn:#F0C060;--warnbg:#3A2E12}}
+:root[data-theme="dark"]{--bg:#0C1520;--panel:#142231;--ink:#E6EDF5;--mute:#8FA1B4;--line:#26394C;--acc:#6FB1F0;--accbg:#1A3350;--accfg:#08213B;--bad:#F2857A;--badbg:#3A1E1E;--ok:#5FD3A0;--okbg:#14352A;--warn:#F0C060;--warnbg:#3A2E12}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:1000px;margin:0 auto;padding:24px 16px 56px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+h1{font-size:22px;margin:0;font-weight:700;letter-spacing:-.01em}
+h2{font-size:16px;margin:0 0 14px;font-weight:600}
+.sub{color:var(--mute);font-size:13px}
+button{font:inherit;font-weight:600;font-size:14px;border:1px solid transparent;border-radius:8px;padding:9px 16px;min-height:40px;cursor:pointer;background:var(--acc);color:var(--accfg)}
+button:hover{filter:brightness(1.08)}
+button.ghost{background:var(--panel);color:var(--ink);border-color:var(--line)}
+button.danger{background:var(--panel);color:var(--bad);border-color:var(--line)}
+button.link{background:none;border:0;color:var(--acc);padding:2px 0;min-height:0;font-weight:600}
+button.x{background:none;border:0;color:var(--mute);min-height:32px;padding:2px 8px;font-size:18px;line-height:1}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.stats{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.stat b{display:block;font-size:22px;font-weight:700;letter-spacing:-.01em;margin-top:2px}
+.stat.main b{font-size:34px}
+.stat.main.low b{color:var(--bad)}
+.gauge{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:12px}
+.gauge i{display:block;height:100%;background:var(--acc);border-radius:4px;transition:width .35s}
+.low .gauge i{background:var(--bad)}
+.banner{padding:11px 14px;border-radius:10px;font-size:14px;font-weight:500;margin-bottom:12px;background:var(--warnbg);color:var(--warn)}
+.banner.bad{background:var(--badbg);color:var(--bad)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:20px 0 16px}
+.tabs button{background:none;color:var(--mute);border:0;border-bottom:2px solid transparent;border-radius:0;padding:10px 14px;margin-bottom:-1px}
+.tabs button[aria-selected=true]{color:var(--acc);border-bottom-color:var(--acc)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tools>*{flex:1;min-width:140px}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%;min-height:40px}
+label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:500;color:var(--mute)}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:600;color:var(--mute);font-size:13px;border-bottom:1px solid var(--line);padding:8px 10px;white-space:nowrap}
+td{padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.n{text-align:right;white-space:nowrap;font-weight:600}
+.out{color:var(--bad)}.in{color:var(--ok)}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;background:var(--accbg);color:var(--acc);font-weight:500}
+.empty{text-align:center;color:var(--mute);padding:36px 12px}
+.cat{display:grid;grid-template-columns:150px 1fr 110px;gap:12px;align-items:center;margin-bottom:12px;font-size:14px}
+.cat .gauge{margin:0}.cat b{text-align:right}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fields .full{grid-column:1/-1}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg label{flex-direction:row;justify-content:center;padding:9px;cursor:pointer;color:var(--ink);font-size:14px;font-weight:600}
+.seg input{display:none}
+.seg label:has(input:checked){background:var(--acc);color:var(--accfg)}
+.seg label:has(input:focus-visible){outline:2px solid var(--acc);outline-offset:-3px}
+.money{position:relative}.money span{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--mute);font-weight:600}.money input{padding-left:28px}
+dialog{border:1px solid var(--line);border-radius:14px;padding:0;background:var(--panel);color:var(--ink);width:min(560px,calc(100vw - 24px));max-height:92vh}
+dialog::backdrop{background:rgba(8,20,32,.55)}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dh h2{margin:0}.db{padding:20px;overflow:auto}
+.df{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.drop{border:1.5px dashed var(--line);border-radius:10px;padding:14px;text-align:center;color:var(--mute);font-size:13px}
+.chips{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.chip{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:8px;padding:6px 6px 6px 8px;font-size:13px}
+.chip img{width:36px;height:36px;object-fit:cover;border-radius:5px}
+.chip .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.view img{width:100%;border-radius:8px;border:1px solid var(--line);margin-bottom:12px}
+.view a{display:block;margin-bottom:12px}
+.err{color:var(--bad);font-size:13px;margin-top:8px}
+.den{display:grid;grid-template-columns:1fr 84px 110px;gap:10px;align-items:center;padding:5px 0;font-size:14px}
+.den input{text-align:right;min-height:36px;padding:6px 9px}.den b,.den .sb{text-align:right}.den .sb{color:var(--mute)}
+.den.tot{border-top:1px solid var(--line);margin-top:6px;padding-top:12px;font-weight:600}.den.tot b{font-size:17px}
+.dg{font-size:13px;font-weight:600;color:var(--mute);margin:12px 0 2px}
+.paper{background:#fff;color:#111;border:1px solid var(--line);border-radius:6px;padding:26px;margin-bottom:14px;font-size:13px}
+.paper th{color:#333;background:#E7ECF3;border-bottom:0}.paper td{border-bottom:1px solid #ddd}
+.paper img{max-width:100%;display:block;margin:12px auto 0;border:1px solid #ddd}
+.sig{display:flex;justify-content:space-between;gap:20px;margin-top:44px}.sig>div{flex:0 0 42%;border-top:1px solid #333;padding-top:4px;font-size:12px}
+#rrows input,#rrows select{min-height:34px;padding:5px 8px;font-size:13px}#rrows td{vertical-align:top}
+.var{font-size:15px;font-weight:600;margin-top:12px;padding:10px 12px;border-radius:8px;background:var(--bg)}
+textarea{min-height:120px;font-size:12px;margin-top:12px}
+@media (max-width:720px){
+.stats{grid-template-columns:1fr 1fr}.stat.main{grid-column:1/-1}
+.grid2,.fields{grid-template-columns:1fr}.cat{grid-template-columns:100px 1fr 90px}
+table,tbody,tr,td{display:block}thead{display:none}
+tr{padding:12px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:2px 10px}
+td{border:0;padding:0}td.n{grid-row:1;grid-column:2;text-align:right}td.act{grid-column:1/-1;display:flex;gap:14px;align-items:center;margin-top:4px}
+}
+button .sp{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:rot .7s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){button .sp{animation-duration:2s}}
+button:disabled{cursor:progress}
+#adInfo b{font-size:15px}#adInfo .sub{font-weight:400;margin-top:2px}
+[hidden]{display:none!important}
+.authwrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+</style>
+<meta name="robots" content="noindex">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+</head>
+<body>
+<div class="authwrap" id="auth" hidden>
+  <form id="authForm" class="card" style="width:min(380px,100%)">
+    <h1 style="margin-bottom:4px">Petty Cash Fund</h1>
+    <p class="sub" style="margin:0 0 18px">Sign in to continue</p>
+    <div class="fields" style="grid-template-columns:1fr">
+      <label>Email<input id="aemail" type="email" autocomplete="username" required></label>
+      <label>Password<input id="apass" type="password" autocomplete="current-password" required></label>
+    </div>
+    <div class="err" id="authErr" hidden></div>
+    <button id="authBtn" type="submit" style="width:100%;margin-top:16px">Sign in</button>
+  </form>
+</div>
+<div class="banner bad" id="syncmsg" hidden role="alert" style="position:fixed;left:16px;right:16px;bottom:16px;max-width:620px;margin:auto;z-index:50"></div>
+<main id="app" hidden>
+<header>
+  <div><h1>Petty Cash Fund</h1><div class="sub">Imprest ledger in Philippine peso</div></div>
+  <div style="display:flex;gap:8px"><button class="ghost" id="outBtn" type="button">Sign out</button><button id="newBtn" type="button">New transaction</button></div>
+</header>
+
+<section class="stats" id="stats">
+  <div class="card stat main" id="mainStat"><span class="sub">Cash on hand</span><b id="bal"></b><div class="gauge"><i id="gfill"></i></div><div class="sub" id="advnote" hidden style="margin-top:8px"></div></div>
+  <div class="card stat"><span class="sub">Fund amount</span><b id="floatv"></b></div>
+  <div class="card stat"><span class="sub">Disbursed</span><b id="spent"></b></div>
+  <div class="card stat"><span class="sub">Replenished</span><b id="topped"></b></div>
+</section>
+<div class="banner" id="alert" hidden role="status"></div>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" aria-selected="true" data-tab="ledger">Ledger</button>
+  <button role="tab" aria-selected="false" data-tab="report">Weekly report</button>
+  <button role="tab" aria-selected="false" data-tab="summary">Summary</button>
+  <button role="tab" aria-selected="false" data-tab="settings">Settings</button>
+</nav>
+
+<section data-pane="ledger" class="card">
+  <div class="tools">
+    <input id="q" type="search" placeholder="Search payee, voucher, or description" aria-label="Search">
+    <select id="fc" aria-label="Category"></select>
+    <select id="ft" aria-label="Type"><option value="">Cash in and out</option><option value="out">Cash out</option><option value="in">Cash in</option></select>
+  </div>
+  <div class="wrap"><table>
+    <thead><tr><th>Date</th><th>Voucher</th><th>Payee and details</th><th class="n">Amount</th><th>Attachments</th><th></th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table></div>
+  <div class="empty" id="empty" hidden>No transactions found. Select New transaction to record one.</div>
+</section>
+
+<section data-pane="summary" hidden>
+  <div class="grid2">
+    <div class="card"><h2>Spending by category</h2><div id="cats"></div></div>
+    <div class="card"><h2>Cash count</h2>
+      <div id="den"></div>
+      <div class="den tot"><span>Total counted</span><span></span><b id="counted">₱0.00</b></div>
+      <div class="var" id="variance"></div>
+      <button class="ghost" id="clearCount" type="button" style="margin-top:12px">Clear count</button>
+    </div>
+  </div>
+</section>
+
+<section data-pane="report" class="card" hidden>
+  <h2>Weekly expense report for replenishment</h2>
+  <div class="fields" style="max-width:660px">
+    <label>From<input type="date" id="rf"></label>
+    <label>To<input type="date" id="rt"></label>
+    <label>Prepared by<input id="rp" placeholder="Custodian name"></label>
+    <label>Checked/Noted by<input id="ra" placeholder="Supervisor name"></label>
+    <label>Paper size<select id="rs"><option value="a4">A4</option><option value="letter">Letter (short bond)</option></select></label>
+    <label style="flex-direction:row;align-items:center;gap:8px;align-self:end;min-height:40px;color:var(--ink)"><input type="checkbox" id="ri" checked style="width:auto;min-height:0">Append scanned attachments</label>
+  </div>
+  <p class="sub" style="margin:20px 0 8px">Edit any cell below if something needs correcting. Changes also update the Ledger.</p>
+  <div class="wrap"><table>
+    <thead><tr><th>Print</th><th>Date</th><th>Category</th><th>Description</th><th class="n">Amount</th><th>Scan</th></tr></thead>
+    <tbody id="rrows"></tbody>
+  </table></div>
+  <div class="empty" id="rempty" hidden>No cash-out transactions in this period.</div>
+  <div class="var" id="rsum"></div>
+  <div style="display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap"><button class="ghost" id="rpv" type="button">Preview report</button><button id="rdl" type="button">Download PDF report</button><span class="sub" id="rmsg" role="status"></span></div>
+</section>
+
+<section data-pane="settings" class="card" hidden>
+  <h2>Fund settings</h2>
+  <div class="fields" style="max-width:520px">
+    <label>Fund amount<div class="money"><span>₱</span><input id="float" type="number" step="0.01" min="0" inputmode="decimal"></div></label>
+    <label>Low-balance alert (% of fund)<input id="low" type="number" min="0" max="100" inputmode="numeric"></label>
+  </div>
+  <h2 style="margin-top:26px">Categories</h2>
+  <div class="chips" id="catlist" style="max-width:520px"></div>
+  <div class="tools" style="max-width:520px;margin-top:10px"><input id="newcat" maxlength="40" placeholder="New category name" aria-label="New category name"><button id="addcat" type="button" style="flex:0 0 auto">Add category</button></div>
+  <h2 style="margin-top:26px">Data</h2>
+  <p class="sub" style="margin:0 0 12px;max-width:560px">Your transactions and scanned attachments are saved in your Supabase database, so they are available on any device where you sign in. Export the CSV now and then as a backup.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="ghost" id="csvBtn" type="button">Show CSV export</button>
+    
+  </div>
+  <textarea id="csv" hidden readonly aria-label="CSV export"></textarea>
+</section>
+</main>
+
+<dialog id="dlg">
+  <div class="dh"><h2>New transaction</h2><button class="x" type="button" data-close aria-label="Close">×</button></div>
+  <div class="db"><form id="f">
+    <div class="fields">
+      <div class="seg full"><label><input type="radio" name="type" value="out" checked>Cash out</label><label><input type="radio" name="type" value="in">Cash in</label></div>
+      <label>Amount<div class="money"><span>₱</span><input name="amount" type="number" step="0.01" min="0.01" inputmode="decimal" required placeholder="0.00"></div></label>
+      <label>Date<input name="date" type="date" required></label>
+      <label class="full">Paid to or received from<input name="payee" required placeholder="e.g. National Book Store"></label>
+      <label>Category<select name="category"></select>
+        <button type="button" class="link" id="dlgAddCat" style="align-self:flex-start;font-size:13px">+ New category</button>
+        <span id="dlgCatRow" style="display:flex;gap:6px" hidden><input id="dlgCat" maxlength="40" placeholder="Category name"><button type="button" id="dlgCatOk" style="flex:0 0 auto">Add</button></span></label>
+      <label>Voucher or receipt no.<input name="ref" placeholder="Auto-numbered if blank"></label>
+      <label class="full">Description<input name="note" placeholder="What was it for?"></label>
+      <label class="full"><span id="advLbl">Paid from advance (optional)</span><div class="money"><span>₱</span><input name="adv" type="number" step="0.01" min="0" inputmode="decimal" placeholder="0.00"></div></label>
+      <div class="full"><label for="file">Scanned receipt, invoice, or voucher</label>
+        <div class="drop" style="margin-top:5px"><input id="file" type="file" accept="image/*,application/pdf" multiple><div style="margin-top:6px">Photos are compressed on this device. PDFs up to 5 MB.</div></div>
+        <div class="chips" id="chips"></div></div>
+    </div>
+    <div class="err" id="err" hidden></div>
+    <div class="df"><button class="ghost" type="button" data-close>Cancel</button><button type="submit" id="saveBtn">Save transaction</button></div>
+  </form></div>
+</dialog>
+
+<dialog id="adlg" style="width:min(420px,calc(100vw - 24px))">
+  <div class="dh"><h2 id="adTitle">Set advance</h2><button class="x" type="button" data-close aria-label="Close">×</button></div>
+  <div class="db"><form id="adForm">
+    <div class="var" id="adInfo" style="margin-top:0"></div>
+    <label style="margin-top:16px"><span id="adQ" style="color:var(--ink);font-size:14px"></span>
+      <div class="money"><span>₱</span><input id="adAmt" type="number" step="0.01" min="0" inputmode="decimal" placeholder="0.00"></div></label>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-top:8px"><span class="sub" id="adHelp"></span><button type="button" class="link" id="adAll" style="font-size:13px;white-space:nowrap"></button></div>
+    <div class="err" id="adErr" hidden></div>
+    <div class="df" style="align-items:center"><button type="button" class="danger" id="adClear">Clear advance</button><span style="display:flex;gap:8px;margin-left:auto"><button class="ghost" type="button" data-close>Cancel</button><button type="submit" id="adSave">Save</button></span></div>
+  </form></div>
+</dialog>
+
+<dialog id="vdlg">
+  <div class="dh"><h2 id="vtitle">Attachments</h2><button class="x" type="button" data-close aria-label="Close">×</button></div>
+  <div class="db view" id="vbody"></div>
+</dialog>
+
+<dialog id="pdlg" style="width:min(860px,calc(100vw - 24px))">
+  <div class="dh"><h2>Report preview</h2><button class="x" type="button" data-close aria-label="Close">×</button></div>
+  <div class="db" id="pbody" style="background:var(--bg)"></div>
+  <div class="df" style="padding:0 20px 16px;margin-top:0"><button class="ghost" type="button" data-close>Close</button><button type="button" id="pdl">Download PDF</button></div>
+</dialog>
+
+<script>
+(function(){
+var KEY='pettycash:v2',CATS=['Office supplies','Postage and courier','Meals and refreshments','Transportation','Cleaning and maintenance','Repairs','Miscellaneous'];
+var S={float:5000,low:20,seq:0,entries:[]},pending=[],urls=[],db=null;
+var PHP=new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP'});
+function money(n){return PHP.format(n)}
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function save(){}
+function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+/* Supabase */
+var SB_URL='https://phfeegpcaqwhsxynlwki.supabase.co',SB_KEY='sb_publishable_SRZWX_DoKATkUbljMHz9-g_1aI03TNn',BUCKET='petty-cash-scans';
+var sb=window.supabase.createClient(SB_URL,SB_KEY),uid=null,fundId=null,paths={},ft=null;
+function fail(m){var el=$('syncmsg');el.textContent=m;el.hidden=false;clearTimeout(ft);ft=setTimeout(function(){el.hidden=true},9000)}
+function chk(r){if(r&&r.error)fail('Could not save: '+r.error.message)}
+function upd(p){return sb.from('pc_funds').update(p).eq('id',fundId).then(chk)}
+async function fget(k){var p=paths[k];if(!p)return null;var r=await sb.storage.from(BUCKET).download(p);if(r.error)throw r.error;return r.data}
+function mapRow(r){return{id:r.id,date:r.txn_date,type:r.type,amount:+r.amount,category:r.category,payee:r.payee,ref:r.voucher_no||'',note:r.note||'',adv:+(r.advance_amount||0),
+  att:(r.pc_attachments||[]).sort(function(a,b){return a.created_at<b.created_at?-1:1}).map(function(a){paths[a.id]=a.storage_path;return{id:a.id,name:a.file_name,type:a.mime_type}})}}
+async function loadAll(){
+  var q=await sb.from('pc_funds').select('*').order('created_at').limit(1);if(q.error)throw q.error;var fd=q.data[0];
+  if(!fd){var r=await sb.rpc('pc_create_fund',{p_name:'Petty Cash Fund',p_amount:5000});if(r.error)throw r.error;
+    q=await sb.from('pc_funds').select('*').eq('id',r.data);if(q.error)throw q.error;fd=q.data[0]}
+  fundId=fd.id;
+  var c=await sb.from('pc_categories').select('name').eq('fund_id',fundId).order('sort_order').order('created_at');if(c.error)throw c.error;
+  var rows=[],from=0;
+  for(;;){var t=await sb.from('pc_transactions').select('*,pc_attachments(*)').eq('fund_id',fundId).order('txn_date').order('created_at').range(from,from+999);if(t.error)throw t.error;rows=rows.concat(t.data);if(t.data.length<1000)break;from+=1000}
+  S={float:+fd.fund_amount,low:fd.low_alert_pct,prep:fd.prepared_by||'',appr:fd.checked_by||'',cats:c.data.map(function(x){return x.name}),entries:rows.map(mapRow)}}
+function compress(file){return new Promise(function(res,rej){var u=URL.createObjectURL(file),im=new Image();
+  im.onload=function(){var m=1600,sc=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);
+  c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(function(b){b?res(b):rej()},'image/jpeg',.82)};
+  im.onerror=function(){URL.revokeObjectURL(u);rej()};im.src=u})}
+/* calc */
+function r2(n){return Math.round(n*100)/100}
+function totals(){var o=0,i=0,ao=0,ai=0;S.entries.forEach(function(e){var a=e.adv||0;if(e.type==='out'){o+=e.amount;ao+=a}else{i+=e.amount;ai+=a}});
+  var bal=r2(S.float+i-o),held=r2(ai-ao),eff=r2(bal-held);
+  return{out:o,in:i,bal:bal,held:held,eff:eff,pend:Math.max(0,r2(S.float-eff)),over:Math.max(0,r2(eff-S.float))}}
+function render(){
+  var t=totals(),isLow=t.eff<=S.float*S.low/100,pend=t.pend,over=t.over;
+  $('bal').textContent=money(t.bal);$('mainStat').className='card stat main'+(isLow?' low':'');
+  $('gfill').style.width=(S.float>0?Math.max(0,Math.min(100,t.eff/S.float*100)):0)+'%';
+  $('floatv').textContent=money(S.float);
+  $('spent').textContent=money(pend);$('topped').textContent=money(t.in);
+  var an=$('advnote');an.hidden=!t.held;an.textContent=t.held>0?'Includes '+money(t.held)+' advance held for upcoming expenses':(t.held<0?'Advance used is more than advance received':'');
+  var a=$('alert');
+  if(t.bal<0){a.hidden=false;a.className='banner bad';a.textContent='The fund is overdrawn by '+money(-t.bal)+'. Check for missing cash-in entries.'}
+  else if(t.held<0){a.hidden=false;a.className='banner bad';a.textContent='Paid-from-advance amounts are '+money(-t.held)+' more than the advance received. Check the advance amounts in the Ledger.'}
+  else if(over>0){a.hidden=false;a.className='banner bad';a.textContent='Cash on hand is over the fund amount by '+money(over)+', not counting advances. Check your cash-in entries, since the replenishment is more than what was disbursed.'}
+  else if(isLow){a.hidden=false;a.className='banner';a.textContent='Cash on hand is low. Request replenishment of '+money(pend)+' to restore the fund.'}
+  else a.hidden=true;
+  var q=$('q').value.toLowerCase(),fc=$('fc').value,ft=$('ft').value;
+  var list=S.entries.filter(function(e){return(!fc||e.category===fc)&&(!ft||e.type===ft)&&(!q||(e.payee+' '+e.note+' '+e.ref).toLowerCase().indexOf(q)>-1)})
+   .sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:b.id-a.id});
+  $('rows').innerHTML=list.map(function(e){var n=(e.att||[]).length;
+   return '<tr><td>'+esc(e.date)+'</td><td>'+esc(e.ref)+'</td><td>'+esc(e.payee)+'<div class="sub">'+(e.note?esc(e.note)+' · ':'')+'<span class="tag">'+esc(e.category)+'</span> <button class="link" data-adv="'+e.id+'" style="font-size:12px">'+(e.adv>0?(e.type==='in'?'Advance ':'From advance ')+money(e.adv)+' (edit)':(e.type==='in'?'+ Advance':'+ From advance'))+'</button></div></td>'
+   +'<td class="n '+e.type+'">'+(e.type==='out'?'−':'+')+money(e.amount)+'</td>'
+   +'<td class="act">'+(n?'<button class="link" data-view="'+e.id+'">View '+n+' file'+(n>1?'s':'')+'</button>':'<span class="sub">None</span>')+'</td>'
+   +'<td class="act"><button class="x" data-del="'+e.id+'" aria-label="Delete transaction">×</button></td></tr>'}).join('');
+  $('empty').hidden=list.length>0;
+  var sums={},max=0;S.entries.forEach(function(e){if(e.type==='out')sums[e.category]=(sums[e.category]||0)+e.amount});
+  Object.keys(sums).forEach(function(k){max=Math.max(max,sums[k])});
+  var keys=Object.keys(sums).sort(function(a,b){return sums[b]-sums[a]});
+  $('cats').innerHTML=keys.length?keys.map(function(k){return '<div class="cat"><span>'+esc(k)+'</span><div class="gauge"><i style="width:'+(sums[k]/max*100)+'%"></i></div><b>'+money(sums[k])+'</b></div>'}).join(''):'<div class="sub">No disbursements yet.</div>';
+  recon();if(document.getElementById("rrows"))renderReport();
+}
+var DEN=[['Bills',[1000,500,200,100,50,20]],['Coins',[20,10,5,1,.25,.05]]];
+function dl(v){return v>=1?'₱'+v.toLocaleString('en-PH'):Math.round(v*100)+' sentimos'}
+function buildDen(){$('den').innerHTML=DEN.map(function(g){return '<div class="dg">'+g[0]+'</div>'+g[1].map(function(v){
+  var id=g[0][0]+v;return '<div class="den"><label for="d'+id+'" style="font-size:14px;color:var(--ink)">'+dl(v)+'</label><input id="d'+id+'" data-v="'+v+'" type="number" min="0" step="1" inputmode="numeric" placeholder="0" aria-label="Number of '+dl(v)+' '+g[0].toLowerCase()+'"><span class="sb" id="s'+id+'">₱0.00</span></div>'}).join('')}).join('')}
+function counted(){var t=0,any=false;document.querySelectorAll('#den input').forEach(function(i){var q=parseInt(i.value,10);
+  if(q>0){any=true;var sub=Math.round(q*parseFloat(i.dataset.v)*100)/100;t+=sub;document.getElementById('s'+i.id.slice(1)).textContent=money(sub)}
+  else document.getElementById('s'+i.id.slice(1)).textContent=money(0)});return{t:Math.round(t*100)/100,any:any}}
+function recon(){var c=counted(),el=$('variance'),b=totals().bal;$('counted').textContent=money(c.t);
+  if(!c.any){el.textContent='Books show '+money(b)+'. Enter the number of each bill and coin to compare.';el.style.color='';return}
+  var d=Math.round((c.t-b)*100)/100;
+  if(d===0){el.textContent='Balanced. Cash matches the books.';el.style.color='var(--ok)'}
+  else{el.textContent=(d<0?'Short by ':'Over by ')+money(Math.abs(d))+'. Look for an unrecorded transaction.';el.style.color='var(--bad)'}}
+/* categories */
+function cats(){return S.cats&&S.cats.length?S.cats:CATS}
+function opt(x){return '<option>'+esc(x)+'</option>'}
+function fillCats(sel){var c=cats(),all=c.slice();S.entries.forEach(function(e){if(all.indexOf(e.category)<0)all.push(e.category)});
+  var cs=document.querySelector('[name=category]'),pv=sel||cs.value,fv=$('fc').value;
+  cs.innerHTML=c.map(opt).join('');if(c.indexOf(pv)>-1)cs.value=pv;
+  $('fc').innerHTML='<option value="">All categories</option>'+all.map(opt).join('');$('fc').value=fv;
+  $('catlist').innerHTML=c.map(function(x,i){return '<div class="chip"><span class="nm">'+esc(x)+'</span><button type="button" class="x" data-rmcat="'+i+'" aria-label="Remove '+esc(x)+'">×</button></div>'}).join('')}
+function addCat(name){name=(name||'').trim();if(!name)return null;
+  var ex=cats().filter(function(c){return c.toLowerCase()===name.toLowerCase()})[0];if(ex)return ex;
+  S.cats=cats().slice();S.cats.push(name);sb.from('pc_categories').insert({fund_id:fundId,name:name,sort_order:S.cats.length}).then(chk);fillCats(name);return name}
+$('addcat').onclick=function(){if(addCat($('newcat').value))$('newcat').value='';$('newcat').focus()};
+$('newcat').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();$('addcat').click()}});
+$('catlist').addEventListener('click',function(e){var i=e.target.getAttribute('data-rmcat');if(i===null||cats().length<2)return;
+  S.cats=cats().slice();var rmName=S.cats.splice(+i,1)[0];sb.from('pc_categories').delete().eq('fund_id',fundId).eq('name',rmName).then(chk);fillCats()});
+$('dlgAddCat').onclick=function(){this.hidden=true;$('dlgCatRow').hidden=false;$('dlgCat').focus()};
+function dlgCatAdd(){var n=addCat($('dlgCat').value);if(n){document.querySelector('[name=category]').value=n;$('dlgCat').value='';$('dlgCatRow').hidden=true;$('dlgAddCat').hidden=false}}
+$('dlgCatOk').onclick=dlgCatAdd;
+$('dlgCat').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();dlgCatAdd()}});
+/* weekly report */
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function fdate(s){return new Date(s+'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'})}
+function inRange(){var f=$('rf').value,t=$('rt').value;return S.entries.filter(function(e){return e.type==='out'&&(!f||e.date>=f)&&(!t||e.date<=t)}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:a.id-b.id})}
+var rowLock=false,skip={};
+function inReport(){return inRange().filter(function(e){return !skip[e.id]})}
+function renderReport(){var all=inRange(),l=all.filter(function(e){return !skip[e.id]}),tot=0,miss=0,off=all.length-l.length;
+  l.forEach(function(e){tot+=e.amount;if(!(e.att||[]).length)miss++});
+  if(!rowLock)$('rrows').innerHTML=all.map(function(e){var n=(e.att||[]).length,c=cats().slice();if(c.indexOf(e.category)<0)c.push(e.category);
+    return '<tr data-id="'+e.id+'"'+(skip[e.id]?' style="opacity:.45"':'')+'><td><input type="checkbox" data-inc="'+e.id+'"'+(skip[e.id]?'':' checked')+' style="width:20px;min-height:0;height:20px;margin-top:8px" aria-label="Include in printout"></td><td><input type="date" data-f="date" value="'+esc(e.date)+'" aria-label="Date"></td>'
+    +'<td><select data-f="category" aria-label="Category">'+c.map(function(x){return '<option'+(x===e.category?' selected':'')+'>'+esc(x)+'</option>'}).join('')+'</select></td>'
+    +'<td><input data-f="payee" value="'+esc(e.payee)+'" aria-label="Description"><input data-f="note" value="'+esc(e.note)+'" placeholder="Details (optional)" aria-label="Details" style="margin-top:4px"></td>'
+    +'<td class="n"><input type="number" step="0.01" min="0.01" data-f="amount" value="'+e.amount+'" style="text-align:right" aria-label="Amount"></td>'
+    +'<td>'+(n?'<button class="link" data-view="'+e.id+'">View '+n+' file'+(n>1?'s':'')+'</button>':'<span class="out">Missing</span>')+'</td></tr>'}).join('');
+  $('rempty').hidden=all.length>0;$('rdl').disabled=!l.length;$('rpv').disabled=!l.length;
+  $('rsum').innerHTML=l.length?'Total to replenish: <b>'+money(tot)+'</b> from '+l.length+' expense'+(l.length>1?'s':'')+(miss?'. <span class="out">'+miss+' without a scanned copy.</span>':'. All have scanned copies.')+(off?' <span class="sub">('+off+' hidden from printout)</span>':''):(all.length?'All lines are unchecked. Check at least one to print.':'Choose a period that has expenses.')}
+function readURL(b){return new Promise(function(r,j){var f=new FileReader();f.onload=function(){r(f.result)};f.onerror=j;f.readAsDataURL(b)})}
+function dims(u){return new Promise(function(r,j){var i=new Image();i.onload=function(){r({w:i.naturalWidth,h:i.naturalHeight})};i.onerror=j;i.src=u})}
+function pm(n){return 'PHP '+n.toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})}
+async function buildPDF(){
+  var doc=new window.jspdf.jsPDF({unit:'mm',format:$('rs').value}),W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight(),M=15,L=inReport(),tot=0,y,i;
+  L.forEach(function(e){tot+=e.amount});tot=Math.round(tot*100)/100;
+  var cw=[24,38,0,34];cw[2]=W-2*M-(24+38+34);var cx=[M];for(i=1;i<4;i++)cx[i]=cx[i-1]+cw[i-1];
+  doc.setFont('helvetica','bold');doc.setFontSize(16);doc.text('Expense Report',M,M+3);
+  doc.setFontSize(10);doc.setFont('helvetica','normal');
+  doc.text('Period: '+($('rf').value?fdate($('rf').value):'start')+' to '+($('rt').value?fdate($('rt').value):'latest'),M,M+9);
+  doc.text('Date prepared: '+fdate(today()),M,M+14);y=M+24;
+  function head(){doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setFillColor(231,236,243);doc.rect(M,y-4.5,W-2*M,7,'F');
+    ['Date','Category','Description'].forEach(function(h,k){doc.text(h,cx[k]+1,y)});doc.text('Amount (PHP)',cx[3]+cw[3]-1,y,{align:'right'});y+=7;doc.setFont('helvetica','normal')}
+  head();doc.setFontSize(9);
+  L.forEach(function(e){var d=doc.splitTextToSize(e.payee+(e.note?' - '+e.note:''),cw[2]-2),c=doc.splitTextToSize(e.category,cw[1]-2),n=Math.max(d.length,c.length),bot=y+(n-1)*3.7+2;
+    if(bot+5>H-M-10){doc.addPage();y=M+4;head();doc.setFontSize(9);bot=y+(n-1)*3.7+2}
+    doc.text(e.date,cx[0]+1,y);doc.text(c,cx[1]+1,y);doc.text(d,cx[2]+1,y);
+    doc.text(pm(e.amount).slice(4),cx[3]+cw[3]-1,y,{align:'right'});
+    doc.setDrawColor(215);doc.line(M,bot,W-M,bot);y=bot+5});
+  if(y>H-M-60){doc.addPage();y=M+8}
+  y+=4;doc.setFontSize(10);doc.setFont('helvetica','normal');
+  doc.text('Fund amount',W-M-70,y);doc.text(pm(S.float),W-M,y,{align:'right'});y+=6;
+  doc.text('Cash on hand',W-M-70,y);doc.text(pm(totals().bal),W-M,y,{align:'right'});y+=8;
+  doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text('Total to be replenished',W-M-70,y);doc.text(pm(tot),W-M,y,{align:'right'});y+=24;
+  doc.setDrawColor(60);doc.line(M,y,M+62,y);doc.line(W-M-62,y,W-M,y);doc.setFont('helvetica','normal');doc.setFontSize(9);
+  doc.text($('rp').value,M,y+5);doc.text('Prepared by ',M,y+10);doc.text($('ra').value,W-M-62,y+5);doc.text('Checked/Noted by',W-M-62,y+10);
+  if($('ri').checked){for(var a=0;a<L.length;a++){var e=L[a];for(var b=0;b<(e.att||[]).length;b++){var t=e.att[b];
+    doc.addPage();doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text('Attachment: '+e.payee+'  |  '+pm(e.amount),M,M+3);
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.text(doc.splitTextToSize(fdate(e.date)+'  |  '+e.category+(e.note?'  |  '+e.note:''),W-2*M),M,M+9);
+    var blob=null;try{blob=await fget(t.id)}catch(x){}
+    if(!blob){doc.text('This file is no longer available in this browser.',M,M+22);continue}
+    if(t.type.indexOf('image/')===0){var du=await readURL(blob),d2=await dims(du),bw=W-2*M,bh=H-2*M-18,sc=Math.min(bw/d2.w,bh/d2.h),w=d2.w*sc,h=d2.h*sc;doc.addImage(du,'JPEG',M+(bw-w)/2,M+16,w,h)}
+    else doc.text('"'+t.name+'" is a PDF and cannot be merged into this report. Send it together with the report.',M,M+22)}}}
+  var n=doc.getNumberOfPages();for(i=1;i<=n;i++){doc.setPage(i);doc.setFontSize(8);doc.setTextColor(120);doc.text('Page '+i+' of '+n,W/2,H-8,{align:'center'})}
+  return doc}
+var purls=[];
+async function previewReport(){
+  var L=inReport(),tot=0,f=$('rf').value,t=$('rt').value;purls.forEach(function(u){URL.revokeObjectURL(u)});purls=[];
+  L.forEach(function(e){tot+=e.amount});
+  var h='<div class="paper"><h3 style="margin:0 0 4px;font-size:18px">Petty Cash Expense Report</h3><div>Period: '+(f?fdate(f):'start')+' to '+(t?fdate(t):'latest')+'</div><div style="margin-bottom:14px">Date prepared: '+fdate(today())+'</div>'
+   +'<div class="wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th class="n">Amount</th></tr></thead><tbody>'
+   +L.map(function(e){return '<tr><td>'+esc(e.date)+'</td><td>'+esc(e.category)+'</td><td>'+esc(e.payee)+(e.note?' - '+esc(e.note):'')+'</td><td class="n">'+money(e.amount)+'</td></tr>'}).join('')
+   +'</tbody></table></div><div style="text-align:right;margin-top:14px;line-height:1.7">Fund amount : '+money(S.float)+'<br>Cash on hand : '+money(totals().bal)+'<br><b style="font-size:15px">Total to be replenished: '+money(tot)+'</b></div>'
+   +'<div class="sig"><div>'+(esc($('rp').value)||'&nbsp;')+'<br><span style="color:#555">Prepared by</span></div><div>'+(esc($('ra').value)||'&nbsp;')+'<br><span style="color:#555">Checked/Noted by</span></div></div></div>';
+  if($('ri').checked)for(var a=0;a<L.length;a++){var e=L[a];for(var b=0;b<(e.att||[]).length;b++){var at=e.att[b],blob=null;try{blob=await fget(at.id)}catch(x){}
+    h+='<div class="paper"><b>Attachment: '+esc(e.payee)+' | '+money(e.amount)+'</b><div>'+esc(fdate(e.date))+' | '+esc(e.category)+'</div>';
+    if(blob&&at.type.indexOf('image/')===0){var u=URL.createObjectURL(blob);purls.push(u);h+='<img alt="'+esc(at.name)+'" src="'+u+'">'}
+    else h+='<p>'+(blob?'"'+esc(at.name)+'" is a PDF and will not be merged into the report.':'File no longer available in this browser.')+'</p>';
+    h+='</div>'}}
+  $('pbody').innerHTML=h;$('pdlg').showModal()}
+function editRow(e){var t=e.target,inc=t.getAttribute('data-inc');
+  if(inc!==null){if(t.checked)delete skip[inc];else skip[inc]=1;renderReport();return}
+  var f=t.getAttribute('data-f');if(!f)return;
+  var en=S.entries.filter(function(x){return String(x.id)===t.closest('tr').getAttribute('data-id')})[0];if(!en)return;var v=t.value;
+  if(f==='amount'){v=parseFloat(v);if(!(v>0)){t.value=en.amount;return}v=Math.round(v*100)/100}
+  else if(f==='date'){if(!v){t.value=en.date;return}}
+  else if(f==='payee'){v=v.trim();if(!v){t.value=en.payee;return}}
+  else if(f==='note')v=v.trim();
+  var old=en[f],pl={};pl[f==='date'?'txn_date':f]=(f==='note'?(v||null):v);en[f]=v;rowLock=true;render();rowLock=false;
+  sb.from('pc_transactions').update(pl).eq('id',en.id).then(function(r){if(r.error){en[f]=old;fail('Could not save change: '+r.error.message);renderReport();render()}})}
+function initReport(){$('rrows').addEventListener('change',editRow);$('rpv').onclick=async function(){var b=this;if(b.dataset.busy)return;b.dataset.busy='1';b.disabled=true;var oh=b.innerHTML;b.innerHTML='<span class="sp"></span>Preparing preview…';
+    try{await previewReport()}catch(x){$('rmsg').textContent='Could not build the preview. Try again.'}
+    b.innerHTML=oh;delete b.dataset.busy;b.disabled=false;renderReport()};$('pdl').onclick=function(){$('pdlg').close();$('rdl').click()};var d=new Date(),k=(d.getDay()+6)%7;
+  $('rf').value=iso(new Date(d.getFullYear(),d.getMonth(),d.getDate()-k));$('rt').value=today();$('rp').value=S.prep||'';$('ra').value=S.appr||'';
+  ['rf','rt'].forEach(function(i){$(i).addEventListener('input',renderReport)});
+  $('rp').addEventListener('change',function(){S.prep=this.value;upd({prepared_by:this.value})});$('ra').addEventListener('change',function(){S.appr=this.value;upd({checked_by:this.value})});
+  $('rdl').onclick=async function(){var m=$('rmsg'),btn=this;
+    if(!window.jspdf){m.textContent='The PDF tool did not load. Check your connection and reload.';return}
+    var dl={save:async function(o){var a=document.createElement('a');a.href=URL.createObjectURL(o.data);a.download=o.filename;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},4000)}};
+    if(btn.dataset.busy)return;btn.dataset.busy='1';var oh=btn.innerHTML;btn.innerHTML='<span class="sp"></span>Preparing PDF…';btn.disabled=true;m.textContent='';
+    try{var doc=await buildPDF();m.textContent='';
+      await dl.save({filename:'Petty-Cash-Report_'+($('rf').value||'start')+'_to_'+($('rt').value||'latest')+'.pdf',data:doc.output('blob')});m.textContent='Report ready.'}
+    catch(e){m.textContent=e&&e.code==='declined'?'Download cancelled.':'Could not create the PDF. Try again, or turn off attachments.'}
+    btn.innerHTML=oh;delete btn.dataset.busy;btn.disabled=false;renderReport()};
+  renderReport()}
+/* new transaction dialog */
+function drawChips(){var c=$('chips');c.innerHTML='';pending.forEach(function(p,i){var d=document.createElement('div');d.className='chip';
+  d.innerHTML=(p.thumb?'<img alt="" src="'+p.thumb+'">':'<span class="tag">PDF</span>')+'<span class="nm">'+esc(p.name)+'</span><span class="sub">'+Math.round(p.blob.size/1024)+' KB</span><button type="button" class="x" data-rm="'+i+'" aria-label="Remove file">×</button>';c.appendChild(d)})}
+function showErr(m){var e=$('err');e.hidden=!m;e.textContent=m||''}
+function advLabel(){$('advLbl').textContent=document.querySelector('[name=type]:checked').value==='in'?'Advance portion (optional): part of this cash in that is NOT a replenishment':'Paid from advance (optional): part of this expense taken from the advance held'}
+document.querySelectorAll('[name=type]').forEach(function(r){r.addEventListener('change',advLabel)});
+$('newBtn').onclick=function(){$('f').reset();advLabel();$('f').date.value=today();pending=[];drawChips();showErr('');$('dlgCatRow').hidden=true;$('dlgAddCat').hidden=false;$('dlg').showModal();$('f').amount.focus()};
+$('file').addEventListener('change',async function(){showErr('');var fs=Array.prototype.slice.call(this.files);this.value='';
+  for(var i=0;i<fs.length;i++){var f=fs[i];
+   try{if(f.type.indexOf('image/')===0){var b=await compress(f);pending.push({blob:b,name:f.name.replace(/\.\w+$/,'')+'.jpg',type:'image/jpeg',thumb:URL.createObjectURL(b)})}
+   else if(f.type==='application/pdf'){if(f.size>5242880){showErr(f.name+' is over 5 MB.');continue}pending.push({blob:f,name:f.name,type:f.type})}
+   else showErr(f.name+' is not an image or PDF.')}catch(e){showErr('Could not read '+f.name+'.')}}
+  drawChips()});
+$('chips').addEventListener('click',function(e){var i=e.target.getAttribute('data-rm');if(i===null)return;var p=pending.splice(+i,1)[0];if(p.thumb)URL.revokeObjectURL(p.thumb);drawChips()});
+$('f').addEventListener('submit',async function(ev){ev.preventDefault();var f=ev.target,amt=parseFloat(f.amount.value);
+  if(!(amt>0))return showErr('Enter an amount greater than zero.');
+  var adv=parseFloat(f.adv.value)||0;if(adv<0||adv>amt)return showErr('The advance portion cannot be more than the amount.');
+  var type=f.type.value;
+  if(type==='out'&&amt>totals().bal&&!confirm('This is more than the cash on hand ('+money(totals().bal)+'). Save anyway?'))return;
+  $('saveBtn').disabled=true;var rid=null,up=[];
+  try{
+    var ins=await sb.from('pc_transactions').insert(Object.assign({fund_id:fundId,txn_date:f.date.value,type:type,amount:Math.round(amt*100)/100,category:f.category.value,payee:f.payee.value.trim(),note:f.note.value.trim()||null,voucher_no:f.ref.value.trim()||null},adv>0?{advance_amount:r2(adv)}:{})).select().single();
+    if(ins.error)throw ins.error;var r=ins.data;rid=r.id;var att=[];
+    for(var i=0;i<pending.length;i++){var p=pending[i],path=uid+'/'+r.id+'/'+Date.now()+'_'+i+'_'+p.name.replace(/[^\w.\-]+/g,'_');
+      var u=await sb.storage.from(BUCKET).upload(path,p.blob,{contentType:p.type});if(u.error)throw u.error;up.push(path);
+      var ar=await sb.from('pc_attachments').insert({transaction_id:r.id,storage_path:path,file_name:p.name,mime_type:p.type,size_bytes:p.blob.size}).select().single();if(ar.error)throw ar.error;
+      paths[ar.data.id]=path;att.push({id:ar.data.id,name:p.name,type:p.type})}
+    S.entries.push({id:r.id,date:r.txn_date,type:r.type,amount:+r.amount,category:r.category,payee:r.payee,ref:r.voucher_no||'',note:r.note||'',adv:+(r.advance_amount||0),att:att})
+  }catch(e){
+    if(up.length)await sb.storage.from(BUCKET).remove(up);if(rid)await sb.from('pc_transactions').delete().eq('id',rid);
+    $('saveBtn').disabled=false;return showErr('Could not save: '+(e.message||e))}
+  $('saveBtn').disabled=false;pending.forEach(function(p){if(p.thumb)URL.revokeObjectURL(p.thumb)});pending=[];$('dlg').close();render()});
+/* advance dialog */
+var advEn=null;
+function adErr(m){var e=$('adErr');e.textContent=m||'';e.hidden=!m}
+function openAdv(en){advEn=en;var isIn=en.type==='in';
+  $('adTitle').textContent=isIn?'Set advance':'Paid from advance';
+  $('adInfo').innerHTML='<b>'+esc(en.payee)+'</b><div class="sub">'+esc(fdate(en.date))+' · '+(isIn?'Cash in ':'Cash out ')+money(en.amount)+'</div>';
+  $('adQ').textContent=isIn?'How much of this cash in is an advance, not a replenishment?':'How much of this expense was paid from the advance held?';
+  $('adHelp').textContent=isIn?'Held for a future expense. It does not count toward the fund balance.':'This reduces the advance held.';
+  $('adAll').textContent='Use full amount';$('adAmt').value=en.adv>0?en.adv:'';$('adAmt').max=en.amount;
+  $('adClear').hidden=!(en.adv>0);adErr('');$('adSave').disabled=false;$('adSave').textContent='Save';
+  $('adlg').showModal();setTimeout(function(){$('adAmt').focus();$('adAmt').select()},0)}
+$('adAll').onclick=function(){if(advEn)$('adAmt').value=advEn.amount;$('adAmt').focus()};
+$('adClear').onclick=function(){$('adAmt').value='0';$('adForm').requestSubmit()};
+$('adForm').addEventListener('submit',async function(ev){ev.preventDefault();var en=advEn,btn=$('adSave');if(!en||btn.disabled)return;
+  var v=$('adAmt').value===''?0:parseFloat($('adAmt').value);
+  if(!(v>=0)||v>en.amount){adErr('Enter an amount from 0 up to '+money(en.amount)+'.');return}
+  v=r2(v);adErr('');btn.disabled=true;btn.innerHTML='<span class="sp"></span>Saving';
+  var r=await sb.from('pc_transactions').update({advance_amount:v}).eq('id',en.id);
+  btn.disabled=false;btn.textContent='Save';
+  if(r.error){adErr('Could not save: '+r.error.message);return}
+  en.adv=v;$('adlg').close();render()});
+/* viewer + delete */
+async function rowClick(e){
+  var v=e.target.getAttribute('data-view'),d=e.target.getAttribute('data-del'),ad=e.target.getAttribute('data-adv');
+  if(ad){var ea=S.entries.filter(function(x){return String(x.id)===ad})[0];if(ea)openAdv(ea);return}
+  if(v){var en=S.entries.filter(function(x){return String(x.id)===v})[0];if(!en)return;
+    $('vtitle').textContent=en.ref+' · '+en.payee;var body=$('vbody');body.innerHTML='';urls.forEach(URL.revokeObjectURL);urls=[];
+    for(var i=0;i<en.att.length;i++){var a=en.att[i],blob=null;try{blob=await fget(a.id)}catch(x){}
+      if(!blob){body.insertAdjacentHTML('beforeend','<p class="sub">'+esc(a.name)+' is no longer available in this browser.</p>');continue}
+      var u=URL.createObjectURL(blob);urls.push(u);
+      if(a.type.indexOf('image/')===0)body.insertAdjacentHTML('beforeend','<img alt="'+esc(a.name)+'" src="'+u+'">');
+      else body.insertAdjacentHTML('beforeend','<a class="tag" target="_blank" rel="noopener" href="'+u+'">Open '+esc(a.name)+'</a>')}
+    $('vdlg').showModal()}
+  if(d){if(!confirm('Delete this transaction and its attachments?'))return;
+    var en2=S.entries.filter(function(x){return String(x.id)===d})[0];
+    if(!en2)return;var ps=(en2.att||[]).map(function(a){return paths[a.id]}).filter(Boolean);
+    var dr=await sb.from('pc_transactions').delete().eq('id',d);if(dr.error){fail('Could not delete: '+dr.error.message);return}
+    if(ps.length)sb.storage.from(BUCKET).remove(ps);
+    S.entries=S.entries.filter(function(x){return String(x.id)!==d});render()}}
+$('rows').addEventListener('click',rowClick);$('rrows').addEventListener('click',rowClick);
+document.addEventListener('click',function(e){if(e.target.hasAttribute('data-close')){var dl=e.target.closest('dialog');if(dl)dl.close()}});
+['dlg','vdlg','pdlg','adlg'].forEach(function(i){$(i).addEventListener('click',function(e){if(e.target===this)this.close()})});
+/* tabs, filters, settings */
+document.querySelectorAll('[data-tab]').forEach(function(b){b.onclick=function(){
+  document.querySelectorAll('[data-tab]').forEach(function(x){x.setAttribute('aria-selected',x===b)});
+  document.querySelectorAll('[data-pane]').forEach(function(p){p.hidden=p.getAttribute('data-pane')!==b.getAttribute('data-tab')})}});
+['q','fc','ft'].forEach(function(i){$(i).addEventListener('input',render)});
+$('den').addEventListener('input',recon);$('clearCount').onclick=function(){document.querySelectorAll('#den input').forEach(function(i){i.value=''});recon()};
+$('float').addEventListener('change',function(){var v=parseFloat(this.value);if(v>=0){S.float=v;upd({fund_amount:v});render()}else this.value=S.float});
+$('low').addEventListener('change',function(){var v=parseFloat(this.value);if(v>=0&&v<=100){S.low=v;upd({low_alert_pct:v});render()}else this.value=S.low});
+$('csvBtn').onclick=function(){
+  function c(x){x=String(x==null?'':x);return /[",\n]/.test(x)?'"'+x.replace(/"/g,'""')+'"':x}
+  var L=[['Date','Voucher no.','Type','Amount (PHP)','Category','Payee','Description','Advance portion','Attachments'].join(',')].concat(S.entries.slice().sort(function(a,b){return a.date<b.date?-1:1}).map(function(e){
+    return [e.date,e.ref,e.type==='out'?'Cash out':'Cash in',e.amount.toFixed(2),e.category,e.payee,e.note,(e.adv||0).toFixed(2),(e.att||[]).length].map(c).join(',')}));
+  var t=$('csv');t.hidden=!t.hidden;t.value=L.join('\n');if(!t.hidden){t.focus();t.select()}};
+function init(){$('float').value=S.float;$('low').value=S.low;render()}
+buildDen();initReport();
+function show(on){$('auth').hidden=on;$('app').hidden=!on}
+async function start(user){uid=user.id;
+  try{await loadAll()}catch(e){show(false);$('authErr').hidden=false;$('authErr').textContent='Could not load your data: '+(e.message||e);return}
+  fillCats();init();$('rp').value=S.prep||'';$('ra').value=S.appr||'';show(true)}
+$('authForm').addEventListener('submit',async function(e){e.preventDefault();var b=$('authBtn');b.disabled=true;$('authErr').hidden=true;
+  var r=await sb.auth.signInWithPassword({email:$('aemail').value.trim(),password:$('apass').value});b.disabled=false;
+  if(r.error){$('authErr').hidden=false;$('authErr').textContent=r.error.message;return}
+  $('apass').value='';start(r.data.user)});
+$('outBtn').onclick=async function(){await sb.auth.signOut();location.reload()};
+sb.auth.getSession().then(function(r){var ss=r.data&&r.data.session;if(ss)start(ss.user);else show(false)});
+})();
+</script>
+</body>
+</html>
