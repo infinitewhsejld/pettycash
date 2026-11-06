@@ -91,12 +91,22 @@ textarea{min-height:120px;font-size:12px;margin-top:12px}
 .grid2,.fields{grid-template-columns:1fr}.cat{grid-template-columns:100px 1fr 90px}
 table,tbody,tr,td{display:block}thead{display:none}
 tr{padding:12px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:2px 10px}
+td.act button.link,td button.x{min-height:44px;min-width:44px}
 td{border:0;padding:0}td.n{grid-row:1;grid-column:2;text-align:right}td.act{grid-column:1/-1;display:flex;gap:14px;align-items:center;margin-top:4px}
 }
-button .sp{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:rot .7s linear infinite}
+.sp{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;margin-right:8px;vertical-align:-2px;animation:rot .7s linear infinite}
 @keyframes rot{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){button .sp{animation-duration:2s}}
+@media (prefers-reduced-motion:reduce){.sp{animation-duration:2s}}
 button:disabled{cursor:progress}
+.att{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:12px}
+.att img{margin:0 0 10px}.att a{margin-bottom:10px}
+.attbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.attbar .nm{flex:1 1 140px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;color:var(--mute)}
+.attbar button{min-height:44px;padding:9px 14px}
+.addzone{border:1.5px dashed var(--line);border-radius:10px;padding:12px;text-align:center}
+.addzone button{width:100%;min-height:44px}.addzone .sub{margin-top:6px}
+.vstat{margin-top:12px;font-weight:500;color:var(--ink)}
+.view .att-empty{margin:0 0 12px}
 #adInfo b{font-size:15px}#adInfo .sub{font-weight:400;margin-top:2px}
 [hidden]{display:none!important}
 .authwrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
@@ -241,7 +251,17 @@ button:disabled{cursor:progress}
 
 <dialog id="vdlg">
   <div class="dh"><h2 id="vtitle">Attachments</h2><button class="x" type="button" data-close aria-label="Close">×</button></div>
-  <div class="db view" id="vbody"></div>
+  <div class="db view" id="vbody">
+    <div id="attList"></div>
+    <div class="addzone">
+      <button type="button" class="ghost" id="vAdd">+ Add scans or photos</button>
+      <div class="sub">Photos are compressed on this device. PDFs up to 5 MB.</div>
+    </div>
+    <div class="sub vstat" id="vStat" role="status" hidden></div>
+    <div class="err" id="vErr" role="alert" hidden></div>
+    <input id="vFile" type="file" accept="image/*,application/pdf" multiple hidden>
+    <input id="vRep" type="file" accept="image/*,application/pdf" hidden>
+  </div>
 </dialog>
 
 <dialog id="pdlg" style="width:min(860px,calc(100vw - 24px))">
@@ -306,7 +326,7 @@ function render(){
   $('rows').innerHTML=list.map(function(e){var n=(e.att||[]).length;
    return '<tr><td>'+esc(e.date)+'</td><td>'+esc(e.ref)+'</td><td>'+esc(e.payee)+'<div class="sub">'+(e.note?esc(e.note)+' · ':'')+'<span class="tag">'+esc(e.category)+'</span> <button class="link" data-adv="'+e.id+'" style="font-size:12px">'+(e.adv>0?(e.type==='in'?'Advance ':'From advance ')+money(e.adv)+' (edit)':(e.type==='in'?'+ Advance':'+ From advance'))+'</button></div></td>'
    +'<td class="n '+e.type+'">'+(e.type==='out'?'−':'+')+money(e.amount)+'</td>'
-   +'<td class="act">'+(n?'<button class="link" data-view="'+e.id+'">View '+n+' file'+(n>1?'s':'')+'</button>':'<span class="sub">None</span>')+'</td>'
+   +'<td class="act">'+(n?'<button class="link" data-view="'+e.id+'">View or edit '+n+' file'+(n>1?'s':'')+'</button>':'<button class="link" data-view="'+e.id+'">+ Add scan</button>')+'</td>'
    +'<td class="act"><button class="x" data-del="'+e.id+'" aria-label="Delete transaction">×</button></td></tr>'}).join('');
   $('empty').hidden=list.length>0;
   var sums={},max=0;S.entries.forEach(function(e){if(e.type==='out')sums[e.category]=(sums[e.category]||0)+e.amount});
@@ -359,7 +379,7 @@ function renderReport(){var all=inRange(),l=all.filter(function(e){return !skip[
     +'<td><select data-f="category" aria-label="Category">'+c.map(function(x){return '<option'+(x===e.category?' selected':'')+'>'+esc(x)+'</option>'}).join('')+'</select></td>'
     +'<td><input data-f="payee" value="'+esc(e.payee)+'" aria-label="Description"><input data-f="note" value="'+esc(e.note)+'" placeholder="Details (optional)" aria-label="Details" style="margin-top:4px"></td>'
     +'<td class="n"><input type="number" step="0.01" min="0.01" data-f="amount" value="'+e.amount+'" style="text-align:right" aria-label="Amount"></td>'
-    +'<td>'+(n?'<button class="link" data-view="'+e.id+'">View '+n+' file'+(n>1?'s':'')+'</button>':'<span class="out">Missing</span>')+'</td></tr>'}).join('');
+    +'<td>'+(n?'<button class="link" data-view="'+e.id+'">View or edit '+n+' file'+(n>1?'s':'')+'</button>':'<button class="link" data-view="'+e.id+'" style="color:var(--bad)">Missing · Add scan</button>')+'</td></tr>'}).join('');
   $('rempty').hidden=all.length>0;$('rdl').disabled=!l.length;$('rpv').disabled=!l.length;
   $('rsum').innerHTML=l.length?'Total to replenish: <b>'+money(tot)+'</b> from '+l.length+' expense'+(l.length>1?'s':'')+(miss?'. <span class="out">'+miss+' without a scanned copy.</span>':'. All have scanned copies.')+(off?' <span class="sub">('+off+' hidden from printout)</span>':''):(all.length?'All lines are unchecked. Check at least one to print.':'Choose a period that has expenses.')}
 function readURL(b){return new Promise(function(r,j){var f=new FileReader();f.onload=function(){r(f.result)};f.onerror=j;f.readAsDataURL(b)})}
@@ -490,18 +510,76 @@ $('adForm').addEventListener('submit',async function(ev){ev.preventDefault();var
   btn.disabled=false;btn.textContent='Save';
   if(r.error){adErr('Could not save: '+r.error.message);return}
   en.adv=v;$('adlg').close();render()});
+/* attachment editor (viewer dialog) */
+var vEn=null,vTok=0,vBusy=false,repId=null;
+function vErr(m){var e=$('vErr');e.textContent=m||'';e.hidden=!m}
+function vStat(m){var e=$('vStat');e.innerHTML=m?'<span class="sp"></span>'+esc(m):'';e.hidden=!m}
+function setBusy(on,msg){vBusy=on;$('vdlg').querySelectorAll('#vbody button').forEach(function(b){b.disabled=on});vStat(on?msg:'')}
+function sizeKB(n){return n>=1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB'}
+async function drawViewer(){
+  var en=vEn,tok=++vTok,list=$('attList');if(!en)return;
+  $('vtitle').textContent=(en.ref?en.ref+' · ':'')+en.payee;
+  urls.forEach(function(u){URL.revokeObjectURL(u)});urls=[];
+  if(!en.att.length){list.innerHTML='<p class="sub att-empty">No scans attached yet. Add one below.</p>';return}
+  list.innerHTML='<p class="sub att-empty"><span class="sp"></span>Loading files…</p>';
+  var h='';
+  for(var i=0;i<en.att.length;i++){var a=en.att[i],blob=null;try{blob=await fget(a.id)}catch(x){}
+    if(tok!==vTok)return;
+    var pv;
+    if(!blob)pv='<p class="sub" style="margin:0 0 10px">This file could not be loaded.</p>';
+    else{var u=URL.createObjectURL(blob);urls.push(u);
+      pv=a.type.indexOf('image/')===0?'<img alt="'+esc(a.name)+'" src="'+u+'">':'<a class="tag" target="_blank" rel="noopener" href="'+u+'">Open '+esc(a.name)+'</a>'}
+    h+='<div class="att">'+pv+'<div class="attbar"><span class="nm" title="'+esc(a.name)+'">'+esc(a.name)+(blob?' · '+sizeKB(blob.size):'')+'</span>'
+      +'<button type="button" class="ghost" data-rep="'+a.id+'">Replace</button><button type="button" class="danger" data-rma="'+a.id+'">Remove</button></div></div>'}
+  if(tok!==vTok)return;list.innerHTML=h}
+async function prepFile(f){
+  if(f.type.indexOf('image/')===0){var b=await compress(f);return{blob:b,name:f.name.replace(/\.\w+$/,'')+'.jpg',type:'image/jpeg'}}
+  if(f.type==='application/pdf'){if(f.size>5242880)throw new Error(f.name+' is over 5 MB.');return{blob:f,name:f.name,type:f.type}}
+  throw new Error(f.name+' is not an image or PDF.')}
+async function putAtt(en,p){
+  var path=uid+'/'+en.id+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,6)+'_'+p.name.replace(/[^\w.\-]+/g,'_');
+  var u=await sb.storage.from(BUCKET).upload(path,p.blob,{contentType:p.type});if(u.error)throw u.error;
+  var ar=await sb.from('pc_attachments').insert({transaction_id:en.id,storage_path:path,file_name:p.name,mime_type:p.type,size_bytes:p.blob.size}).select().single();
+  if(ar.error){await sb.storage.from(BUCKET).remove([path]);throw ar.error}
+  paths[ar.data.id]=path;return{id:ar.data.id,name:p.name,type:p.type}}
+async function delAtt(en,a){
+  var path=paths[a.id],r=await sb.from('pc_attachments').delete().eq('id',a.id).select();if(r.error)throw r.error;
+  if(!r.data||!r.data.length)throw new Error('You do not have permission to remove this file.');
+  if(path)sb.storage.from(BUCKET).remove([path]);delete paths[a.id];
+  en.att=en.att.filter(function(x){return x.id!==a.id})}
+async function addFiles(files){
+  var en=vEn;if(!en||vBusy||!files.length)return;vErr('');var errs=[],done=0;
+  for(var i=0;i<files.length;i++){setBusy(true,'Uploading '+(i+1)+' of '+files.length+'…');
+    try{var p=await prepFile(files[i]);en.att.push(await putAtt(en,p));done++}
+    catch(e){errs.push((e&&e.message)||('Could not upload '+files[i].name+'.'))}}
+  setBusy(false);render();if(errs.length)vErr(errs.join(' '));if(vEn===en)drawViewer()}
+async function replaceFile(id,file){
+  var en=vEn,old=en&&en.att.filter(function(x){return x.id===id})[0];if(!old||vBusy)return;vErr('');
+  setBusy(true,'Replacing file…');
+  try{var p=await prepFile(file),n=await putAtt(en,p);
+    try{await delAtt(en,old)}catch(e){/* new file is saved; old one stays if it cannot be removed */vErr('The new file was added, but the old one could not be removed: '+((e&&e.message)||e))}
+    en.att.push(n)}
+  catch(e){vErr('Could not replace: '+((e&&e.message)||e))}
+  setBusy(false);render();if(vEn===en)drawViewer()}
+async function removeFile(id){
+  var en=vEn,a=en&&en.att.filter(function(x){return x.id===id})[0];if(!a||vBusy)return;
+  if(!confirm('Remove "'+a.name+'" from this transaction? This cannot be undone.'))return;
+  vErr('');setBusy(true,'Removing file…');
+  try{await delAtt(en,a)}catch(e){vErr('Could not remove: '+((e&&e.message)||e))}
+  setBusy(false);render();if(vEn===en)drawViewer()}
+$('vAdd').onclick=function(){if(!vBusy)$('vFile').click()};
+$('vFile').addEventListener('change',function(){var fs=Array.prototype.slice.call(this.files);this.value='';addFiles(fs)});
+$('vRep').addEventListener('change',function(){var f=this.files[0];this.value='';if(f&&repId)replaceFile(repId,f)});
+$('vbody').addEventListener('click',function(e){var b=e.target.closest('button');if(!b||b.disabled)return;
+  var r=b.getAttribute('data-rep'),m=b.getAttribute('data-rma');
+  if(r){repId=r;$('vRep').click()}else if(m)removeFile(m)});
+$('vdlg').addEventListener('close',function(){vTok++;urls.forEach(function(u){URL.revokeObjectURL(u)});urls=[];vEn=null});
 /* viewer + delete */
 async function rowClick(e){
   var v=e.target.getAttribute('data-view'),d=e.target.getAttribute('data-del'),ad=e.target.getAttribute('data-adv');
   if(ad){var ea=S.entries.filter(function(x){return String(x.id)===ad})[0];if(ea)openAdv(ea);return}
   if(v){var en=S.entries.filter(function(x){return String(x.id)===v})[0];if(!en)return;
-    $('vtitle').textContent=en.ref+' · '+en.payee;var body=$('vbody');body.innerHTML='';urls.forEach(URL.revokeObjectURL);urls=[];
-    for(var i=0;i<en.att.length;i++){var a=en.att[i],blob=null;try{blob=await fget(a.id)}catch(x){}
-      if(!blob){body.insertAdjacentHTML('beforeend','<p class="sub">'+esc(a.name)+' is no longer available in this browser.</p>');continue}
-      var u=URL.createObjectURL(blob);urls.push(u);
-      if(a.type.indexOf('image/')===0)body.insertAdjacentHTML('beforeend','<img alt="'+esc(a.name)+'" src="'+u+'">');
-      else body.insertAdjacentHTML('beforeend','<a class="tag" target="_blank" rel="noopener" href="'+u+'">Open '+esc(a.name)+'</a>')}
-    $('vdlg').showModal()}
+    vEn=en;vErr('');vStat('');$('vdlg').showModal();drawViewer();return}
   if(d){if(!confirm('Delete this transaction and its attachments?'))return;
     var en2=S.entries.filter(function(x){return String(x.id)===d})[0];
     if(!en2)return;var ps=(en2.att||[]).map(function(a){return paths[a.id]}).filter(Boolean);
